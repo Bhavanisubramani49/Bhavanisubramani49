@@ -1,10 +1,3 @@
-<!-- 🎬 Animated Banner -->
-<p align="center">
-  <img src="https://github.com/Bhavanisubramani49/Bhavanisubramani49/assets/your-asset-id/banner.gif" alt="Bhavani Banner" width="100%" />
-</p>
-
-<img src="https://avatars.githubusercontent.com/Bhavanisubramani49" width="140" align="right" style="border-radius:50%;" />
-
 ## 👋 Hi, I'm Bhavani S
 
 🎓 3rd Year BE CSE (AI & ML) Student  
@@ -86,5 +79,34 @@
 - 🎯 Improving coding skills through HackerRank + LeetCode
 
 ---
+
+
+## 📊 Personal Dashboard Analytics
+
+### 🔹 HackerRank & LinkedIn — Histogram Chart
+<p align="center">
+  <img src="https://quickchart.io/chart?c={type:'bar',data:{labels:['HackerRank','LinkedIn'],datasets:[{label:'Certifications Earned',data:[8,6]}]}}" alt="HackerRank and LinkedIn Histogram" height="250"/>
+</p>
+
+---
+
+### 🔵 VCET Dashboard — Circle Bar Chart
+<p align="center">
+  <img src="https://quickchart.io/chart?c={type:'radialGauge',data:{datasets:[{data:[70],label:'Progress'}]},options:{trackColor:'lightgray',centerPercentage:80,centerArea:{text:'VCET'}}}" alt="VCET Dashboard Circle Bar Chart" height="250"/>
+</p>
+
+---
+
+### 🟠 LeetCode — Radar Chart
+<p align="center">
+  <img src="https://quickchart.io/chart?c={type:'radar',data:{labels:['Easy','Medium','Hard'],datasets:[{label:'LeetCode',data:[40,25,5]}]},options:{scale:{ticks:{beginAtZero:true}}}}" alt="LeetCode Radar Chart" height="250"/>
+</p>
+
+---
+
+### 🟣 GitHub Streak Stats
+<p align="center">
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=Bhavanisubramani49&theme=radical" height="200"/>
+</p>
 
 ⭐ *Thanks for visiting my profile! Let's connect, collaborate, and grow together 💫*

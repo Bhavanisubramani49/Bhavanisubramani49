@@ -83,9 +83,22 @@
 
 ## 📊 Personal Dashboard Analytics
 
-### 🔹 HackerRank & LinkedIn — Histogram Chart
+
+
+### 🟢 HackerRank — Certifications Histogram
 <p align="center">
-  <img src="https://quickchart.io/chart?c={type:'bar',data:{labels:['HackerRank','LinkedIn'],datasets:[{label:'Certifications Earned',data:[8,6]}]}}" alt="HackerRank and LinkedIn Histogram" height="250"/>
+  <a href="https://www.hackerrank.com/profile/bhavanisubraman3" target="_blank">
+    <img src="https://quickchart.io/chart?c=%7B%22type%22%3A%22bar%22%2C%22data%22%3A%7B%22labels%22%3A%5B%22Python%22%2C%22SQL%22%2C%22Java%22%5D%2C%22datasets%22%3A%5B%7B%22label%22%3A%22HackerRank%20Certificates%22%2C%22data%22%3A%5B3%2C2%2C1%5D%7D%5D%7D%7D" alt="HackerRank Certificates Histogram" height="250"/>
+  </a>
+</p>
+
+---
+
+### 🔵 LinkedIn — Certifications Histogram
+<p align="center">
+  <a href="https://www.linkedin.com/in/s-bhavani-5a2a26290/details/certifications/" target="_blank">
+    <img src="https://quickchart.io/chart?c=%7B%22type%22%3A%22bar%22%2C%22data%22%3A%7B%22labels%22%3A%5B%22MongoDB%22%2C%22AI%20Basics%22%2C%22Python%20Essentials%22%5D%2C%22datasets%22%3A%5B%7B%22label%22%3A%22LinkedIn%20Certifications%22%2C%22data%22%3A%5B2%2C2%2C2%5D%7D%5D%7D%7D" alt="LinkedIn Certifications Histogram" height="250"/>
+  </a>
 </p>
 
 ---

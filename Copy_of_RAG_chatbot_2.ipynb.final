@@ -1,0 +1,291 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "gpuType": "T4",
+      "authorship_tag": "ABX9TyP0kd4I9V7HDEuNZH7fxJGf",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Bhavanisubramani49/Bhavanisubramani49/blob/main/Copy_of_RAG_chatbot_2.ipynb.final\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "isIoUZC1baYk",
+        "outputId": "3323553c-d78e-4278-b4f8-4e6de7ee4eb6"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m23.8/23.8 MB\u001b[0m \u001b[31m63.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m329.6/329.6 kB\u001b[0m \u001b[31m16.1 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25h"
+          ]
+        }
+      ],
+      "source": [
+        "!pip install -q sentence-transformers faiss-cpu transformers gradio pypdf\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import warnings\n",
+        "warnings.filterwarnings(\"ignore\")\n"
+      ],
+      "metadata": {
+        "id": "o5jnldjqczZh"
+      },
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from datetime import datetime\n",
+        "import numpy as np\n",
+        "import faiss\n",
+        "import gradio as gr\n",
+        "\n",
+        "from pypdf import PdfReader\n",
+        "from sentence_transformers import SentenceTransformer\n",
+        "from transformers import pipeline\n"
+      ],
+      "metadata": {
+        "id": "qfmhDKKhcgSG"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "embedding_model = SentenceTransformer(\"all-MiniLM-L6-v2\")\n",
+        "\n",
+        "llm = pipeline(\n",
+        "    \"text-generation\",\n",
+        "    model=\"google/flan-t5-base\",\n",
+        "    max_new_tokens=150\n",
+        ")\n"
+      ],
+      "metadata": {
+        "id": "Jz29nnLHc83z"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "system_logs = []\n",
+        "uploaded_docs = []\n",
+        "\n",
+        "documents = []\n",
+        "embeddings = []\n",
+        "\n",
+        "DIM = 384\n",
+        "index = faiss.IndexFlatL2(DIM)\n"
+      ],
+      "metadata": {
+        "id": "XzL6pFzAdIiY"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def log(msg):\n",
+        "    t = datetime.now().strftime(\"%H:%M:%S\")\n",
+        "    system_logs.append(f\"[{t}] {msg}\")\n",
+        "    return \"\\n\".join(system_logs)\n"
+      ],
+      "metadata": {
+        "id": "u7Gr6P0BdMzG"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def extract_text(pdf_path):\n",
+        "    reader = PdfReader(pdf_path)\n",
+        "    text = \"\"\n",
+        "    for page in reader.pages:\n",
+        "        if page.extract_text():\n",
+        "            text += page.extract_text() + \"\\n\"\n",
+        "    return text\n"
+      ],
+      "metadata": {
+        "id": "Xzjjr64QdS3L"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def chunk_text(text, size=1000):\n",
+        "    return [text[i:i+size] for i in range(0, len(text), size)]\n"
+      ],
+      "metadata": {
+        "id": "LC0FO8hudVGe"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def ingest_document(file):\n",
+        "    uploaded_docs.append(file.name)\n",
+        "    log(f\"Ingesting {file.name}\")\n",
+        "\n",
+        "    text = extract_text(file.name)\n",
+        "    log(\"Text extracted\")\n",
+        "\n",
+        "    chunks = chunk_text(text)\n",
+        "    log(f\"{len(chunks)} chunks created\")\n",
+        "\n",
+        "    vecs = embedding_model.encode(chunks)\n",
+        "    log(\"Embeddings generated\")\n",
+        "\n",
+        "    for c, v in zip(chunks, vecs):\n",
+        "        documents.append(c)\n",
+        "        embeddings.append(v)\n",
+        "\n",
+        "    index.add(np.array(embeddings).astype(\"float32\"))\n",
+        "    log(\"Stored in vector index\")\n",
+        "\n",
+        "    return \"\\n\".join(system_logs), \"\\n\".join(uploaded_docs)\n"
+      ],
+      "metadata": {
+        "id": "eqlrbI4ndaCK"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def retrieve(query, k=6):\n",
+        "    q_vec = embedding_model.encode([query]).astype(\"float32\")\n",
+        "    _, ids = index.search(q_vec, k)\n",
+        "    return [documents[i] for i in ids[0] if i < len(documents)]\n"
+      ],
+      "metadata": {
+        "id": "Eu3rf78gdhaX"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def chatbot(query):\n",
+        "    chunks = retrieve(query, k=6)\n",
+        "\n",
+        "    if not chunks:\n",
+        "        return \"No answer found in documents.\", \"\"\n",
+        "\n",
+        "    context = \"\\n\".join(chunks)\n",
+        "\n",
+        "    prompt = f\"\"\"\n",
+        "You are a study assistant.\n",
+        "Read the entire context carefully and explain the concept completely.\n",
+        "\n",
+        "Context:\n",
+        "{context}\n",
+        "\n",
+        "Question:\n",
+        "{query}\n",
+        "\n",
+        "Give a clear, complete, and meaningful explanation:\n",
+        "\"\"\"\n",
+        "    result = llm(prompt)[0][\"generated_text\"]\n",
+        "\n",
+        "    return result.strip(), \"\\n\\n\".join(chunks)\n"
+      ],
+      "metadata": {
+        "id": "R5zp90G3dksR"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "with gr.Blocks(theme=gr.themes.Soft()) as app:\n",
+        "    gr.Markdown(\"# 📄 Document Chatbot – Milestone 1\")\n",
+        "    gr.Markdown(\"Document ingestion, indexing, and basic chatbot\")\n",
+        "\n",
+        "    with gr.Row():\n",
+        "        with gr.Column():\n",
+        "            file_input = gr.File(label=\"Upload PDF\")\n",
+        "            upload_btn = gr.Button(\"Upload & Index\")\n",
+        "\n",
+        "        with gr.Column():\n",
+        "            status_box = gr.Textbox(\n",
+        "                label=\"System Status\",\n",
+        "                lines=10,\n",
+        "                interactive=False\n",
+        "            )\n",
+        "\n",
+        "    doc_list = gr.Textbox(\n",
+        "        label=\"Uploaded Documents\",\n",
+        "        lines=4,\n",
+        "        interactive=False\n",
+        "    )\n",
+        "\n",
+        "    upload_btn.click(\n",
+        "        ingest_document,\n",
+        "        inputs=file_input,\n",
+        "        outputs=[status_box, doc_list]\n",
+        "    )\n",
+        "\n",
+        "    gr.Markdown(\"---\")\n",
+        "\n",
+        "    question = gr.Textbox(label=\"Ask a Question\")\n",
+        "    answer = gr.Textbox(label=\"Chatbot Answer\")\n",
+        "    sources = gr.Textbox(label=\"Retrieved Chunks\", lines=8)\n",
+        "\n",
+        "    ask_btn = gr.Button(\"Ask\")\n",
+        "    ask_btn.click(chatbot, inputs=question, outputs=[answer, sources])\n",
+        "\n",
+        "app.launch(share=True)\n"
+      ],
+      "metadata": {
+        "id": "cfF4cCyOdoZW"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
